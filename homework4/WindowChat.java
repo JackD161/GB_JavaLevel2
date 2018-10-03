@@ -1,6 +1,7 @@
 package homework4;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class WindowChat extends JFrame {
     JFrame window; // само окно чата
@@ -19,9 +20,9 @@ public class WindowChat extends JFrame {
     WindowChat()
     {
         window = new JFrame("Текстовый чат"); // создаем само окно с названием
-        window.setSize(300,300); // задаем размер окна в пикселах
-        window.getContentPane();
+        window.setBounds(300,300,300,300); // задаем координаты и размер окна в пикселах
         window.setDefaultCloseOperation(EXIT_ON_CLOSE); // добавляем что бы наша программа закрывалась по крестику закрытия окна
+        window.setLayout(new BorderLayout()); // выбираем менеджер отображения
         label = new JLabel("Собеседник"); // здесь задается имя собеседника
         dialog = new JTextField(8); // создаем поля диалога на 8 колонок
         message = new JTextField(4); // создаем поле ввода сообщения на 4 колонки
@@ -38,7 +39,14 @@ public class WindowChat extends JFrame {
         help.add(aboutIt); // добавляем подменю в меню Помощь
         bar.add(file); // добавляем меню Файл на панель меню
         bar.add(help); // добавляем меню Помощь на панель меню
+        window.getContentPane().add(BorderLayout.NORTH, bar); // добавляем меню в шапку окна
+        window.getContentPane().add(BorderLayout.SOUTH, message); // добавляем поле ввода сообщения в низ окна
+        window.getContentPane().add(BorderLayout.CENTER, dialog); // добавляем поле диалога в центр окна
 
         window.setVisible(true); // делаем окно видимым
+    }
+
+    public static void main(String[] args) {
+        new WindowChat();
     }
 }
