@@ -39,5 +39,6 @@ public class WindowChat extends JFrame {
         bar.add(file); // добавляем меню Файл на панель меню
         bar.add(help); // добавляем меню Помощь на панель меню
 
+        window.setVisible(true); // делаем окно видимым
     }
 }
