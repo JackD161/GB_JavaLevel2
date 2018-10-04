@@ -26,8 +26,8 @@ public class WindowChat extends JFrame {
         window.setLayout(new BorderLayout()); // выбираем менеджер компоновки
         label = new JLabel("Собеседник"); // здесь задается имя собеседника
         dialog = new JTextArea(); // создаем поля диалога на 8 колонок
-        message = new JTextField(40); // создаем поле ввода сообщения на 4 колонки
-        contacts = new JTextField(6); // создаем окно контактов
+        message = new JTextField(30); // создаем поле ввода сообщения на 4 колонки
+        contacts = new JTextField(12); // создаем окно контактов
         send = new JButton("Отправить"); // создаем кнопку "Отправить"
         reset = new JButton("Очистить"); // создаем кнопку для очистки поля ввода
         bar = new JMenuBar(); // создаем панель меню
@@ -41,6 +41,9 @@ public class WindowChat extends JFrame {
         help.add(aboutIt); // добавляем подменю в меню Помощь
         bar.add(file); // добавляем меню Файл на панель меню
         bar.add(help); // добавляем меню Помощь на панель меню
+
+        send.setBackground(Color.GREEN); // устанавливаем зеленый фон кнопки отправить
+        reset.setBackground(Color.RED); // устанавливаем красный фон кнопки очистить
 
         JPanel footer = new JPanel();
         footer.setLayout(new FlowLayout());
