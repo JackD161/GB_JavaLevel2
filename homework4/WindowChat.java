@@ -6,8 +6,9 @@ import java.awt.*;
 public class WindowChat extends JFrame {
     JFrame window; // само окно чата
     JLabel label; // название окна чата (возможно имя собеседника)
-    JTextField dialog; // поле в котором отображается текущий диалог
+    JTextArea dialog; // поле в котором отображается текущий диалог
     JTextField message; // поле в котором набирается сообщение для отправки
+    JTextField contacts; // окно контактов
     JButton send; // кнопка отсылающая сообщение
     JButton reset; // кнопка очищающая поле набора сообщения
     JMenuBar bar; // создаем панель меню
@@ -20,12 +21,13 @@ public class WindowChat extends JFrame {
     WindowChat()
     {
         window = new JFrame("Текстовый чат"); // создаем само окно с названием
-        window.setBounds(300,300,300,300); // задаем координаты и размер окна в пикселах
+        window.setBounds(300,300,600,400); // задаем координаты и размер окна в пикселах
         window.setDefaultCloseOperation(EXIT_ON_CLOSE); // добавляем что бы наша программа закрывалась по крестику закрытия окна
-        window.setLayout(new BorderLayout()); // выбираем менеджер отображения
+        window.setLayout(new BorderLayout()); // выбираем менеджер компоновки
         label = new JLabel("Собеседник"); // здесь задается имя собеседника
-        dialog = new JTextField(8); // создаем поля диалога на 8 колонок
-        message = new JTextField(4); // создаем поле ввода сообщения на 4 колонки
+        dialog = new JTextArea(); // создаем поля диалога на 8 колонок
+        message = new JTextField(40); // создаем поле ввода сообщения на 4 колонки
+        contacts = new JTextField(6); // создаем окно контактов
         send = new JButton("Отправить"); // создаем кнопку "Отправить"
         reset = new JButton("Очистить"); // создаем кнопку для очистки поля ввода
         bar = new JMenuBar(); // создаем панель меню
@@ -39,9 +41,17 @@ public class WindowChat extends JFrame {
         help.add(aboutIt); // добавляем подменю в меню Помощь
         bar.add(file); // добавляем меню Файл на панель меню
         bar.add(help); // добавляем меню Помощь на панель меню
+
+        JPanel footer = new JPanel();
+        footer.setLayout(new FlowLayout());
+        footer.add(message);
+        footer.add(send);
+        footer.add(reset);
+
         window.getContentPane().add(BorderLayout.NORTH, bar); // добавляем меню в шапку окна
-        window.getContentPane().add(BorderLayout.SOUTH, message); // добавляем поле ввода сообщения в низ окна
+        window.getContentPane().add(BorderLayout.SOUTH, footer); // добавляем поле ввода сообщения в низ окна
         window.getContentPane().add(BorderLayout.CENTER, dialog); // добавляем поле диалога в центр окна
+        window.getContentPane().add(BorderLayout.EAST, contacts); // добавляем поле контактов в правую обрасть
 
         window.setVisible(true); // делаем окно видимым
     }
