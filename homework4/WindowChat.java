@@ -2,10 +2,11 @@ package homework4;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 
 public class WindowChat extends JFrame {
     private JFrame window; // само окно чата
-    private JLabel label; // название окна чата (возможно имя собеседника)
     private JTextArea dialog; // поле в котором отображается текущий диалог
     private JTextField message; // поле в котором набирается сообщение для отправки
     private JTextArea contacts; // окно контактов
@@ -18,26 +19,22 @@ public class WindowChat extends JFrame {
     private JMenuItem exit; // создаем пункт меню для выхода из приложения
     private JMenuItem aboutIt; // создаем пункт меню справки описывающий текущую программу
 
-    public WindowChat()
+    public WindowChat(String companion)
     {
-        window = new JFrame("Текстовый чат"); // создаем само окно с названием
+        window = new JFrame("Текстовый чат с " + companion); // создаем само окно с названием
         window.setBounds(300,300,700,400); // задаем координаты и размер окна в пикселах
         window.setDefaultCloseOperation(EXIT_ON_CLOSE); // добавляем что бы наша программа закрывалась по крестику закрытия окна
         window.setLayout(new BorderLayout()); // выбираем менеджер компоновки
-        label = new JLabel("Собеседник"); // здесь задается имя собеседника
         dialog = new JTextArea(); // создаем поля диалога на 8 колонок
         message = new JTextField(30); // создаем поле ввода сообщения на 4 колонки
         contacts = new JTextArea( 20, 10); // создаем окно контактов
-
-        contacts.append("Контакт1");
+        contacts.append(companion); // добавляем нашего собеседника в список контактов
         contacts.append("\nКонтакт2");
         contacts.append("\nКонтакт3");
         contacts.append("\nКонтакт4");
         contacts.append("\nКонтакт5");
-
-        contacts.setBackground(Color.GRAY);
-        dialog.setBackground(Color.LIGHT_GRAY);
-
+        contacts.setBackground(Color.GRAY); // устанавливаем цвет поля контактов
+        dialog.setBackground(Color.LIGHT_GRAY); // устанавливаем цвет поля диалога
         send = new JButton("Отправить"); // создаем кнопку "Отправить"
         reset = new JButton("Очистить"); // создаем кнопку для очистки поля ввода
         bar = new JMenuBar(); // создаем панель меню
@@ -57,6 +54,7 @@ public class WindowChat extends JFrame {
         reset.setBackground(Color.RED); // устанавливаем красный фон кнопки очистить
         JPanel footer = new JPanel(); // создаем нижнию панель панель
         JPanel right = new JPanel(); // создаем правую панель
+        JScrollPane scroll = new JScrollPane(dialog); // добавляем прокрутку нашего поля диалога
         footer.setLayout(new FlowLayout()); // устанавливаем нижней панели менеджер компоновки
         right.setLayout(new FlowLayout()); // устанавливаем менеджер размещения правой панели
         right.add(contacts); // добавляем в правую панель поле контактов
@@ -65,12 +63,79 @@ public class WindowChat extends JFrame {
         footer.add(reset); // добавляем на нижнию панель кнопку сброса
         window.getContentPane().add(BorderLayout.NORTH, bar); // добавляем меню в шапку окна
         window.getContentPane().add(BorderLayout.SOUTH, footer); // добавляем поле ввода сообщения в низ окна
-        window.getContentPane().add(BorderLayout.CENTER, dialog); // добавляем поле диалога в центр окна
+        window.getContentPane().add(BorderLayout.CENTER, scroll); // добавляем поле диалога в поле прокрутки в центр окна
         window.getContentPane().add(BorderLayout.EAST, right); // добавляем поле контактов в правую обрасть
+
+        send.addActionListener(new ActionListener() { // добавляем действие для кнопки отправить
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.append("\n" + "Вы: " + message.getText()); // добавляем к нашему диалогу текст из поля сообщения
+                dialog.append("\n" + companion + ": тестовый ответ"); // добавляем импровизированный ответ
+                message.setText(""); // очищаем поле сообщения
+            }
+        });
+        message.addKeyListener(new KeyListener() { // добавляем действие отправки сообщения по кнопке enter
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER)
+                {
+                    dialog.append("\n" + "Вы: " + message.getText());
+                    dialog.append("\n" + companion + ": тестовый ответ");
+                    message.setText("");
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+        reset.addActionListener(new ActionListener() { // добавляем действие очистки поля набора сообщения по нажатию кнопки
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                message.setText(""); // очищаем поле ввода сообщения
+            }
+        });
+        aboutIt.addActionListener(new ActionListener() { // добавляем действие по нажатию на пункт меню о программе
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(window, "Версия чата 1.0"); // выводим всплявающее окно с версией чата
+            }
+        });
+
+        exit.addActionListener(new ActionListener() { // добавляем действие закрытия программы по нажатию на меню выход
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0); // выходим из программы
+            }
+        });
+        saveAs.addActionListener(new ActionListener() { // добавляем действие сохранения истории чата по нажатию на пункт меню сохранить как
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                /*
+                try (FileWriter writer = new FileWriter("C:/temp/dialog.txt", false))
+
+                {
+                    writer.write(dialog.getText());
+                    writer.flush();
+                }
+                catch (IOException exception)
+                {
+                    exception.printStackTrace();
+                }
+                */
+                JOptionPane.showMessageDialog(window,"Ну допустим сохранили диалог");
+            }
+        });
         window.setVisible(true); // делаем окно видимым
     }
 
     public static void main(String[] args) {
-        new WindowChat();
+        new WindowChat("Тестовый собеседник");
     }
 }
