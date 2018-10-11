@@ -9,6 +9,7 @@ public class JabberClient {
         // если в getByName передать null то получим заглушку для тестирования на машине без сети
         InetAddress address = InetAddress.getByName(null);
         System.out.println("Address: " + address);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Socket socket = new Socket(address, JabberServer.PORT);
         try
         {
@@ -17,7 +18,7 @@ public class JabberClient {
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
             for (int i = 0; i < 10; i++)
             {
-                out.println("howdy " + i);
+                out.println(reader.readLine());
                 String string = in.readLine();
                 System.out.println(string);
             }
