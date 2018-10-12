@@ -1,39 +1,77 @@
 package homework6;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.io.*;
 import java.net.Socket;
 
 public class Client {
+
+    private final static String address = "localhost";
+
+    private Socket socket;
+    private DataOutputStream out;
+    private DataInputStream in;
+
     public static void main(String[] args) {
+
+        new Client();
+    }
+
+    private Client() {
+
         try {
-            Socket socket = null;
-            try {
-                InetAddress address = InetAddress.getByName(null);
-                System.out.println("Подлючаемся к адресу " + address);
-                socket = new Socket(address, Server.PORT);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                while (true) {
-                    String messageIn = in.readLine();
-                    if (messageIn.equals("end")) {
-                        break;
+            socket = new Socket(address, Server.PORT);
+            BufferedReader message = new BufferedReader(new InputStreamReader(System.in));
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+
+            // поток для получения сообщений
+            Thread receiveMessagesThread = new Thread(() -> {
+                try {
+                    while (true) {
+                        String str = in.readUTF();
+                        if (str.equals("END")){
+                            System.out.println(str);
+                            break;
+                        }
+                        System.out.println(str);
                     }
-                    System.out.println(messageIn);
-                    out.println(reader.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }  finally {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.exit(0);
                 }
-            } finally {
-                socket.close();
+            });
+            receiveMessagesThread.start();
+
+            // поток для отправки сообщений
+            Thread sendMessagesThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            String answer = message.readLine();
+                            out.writeUTF("Клиент написал" + ": " + answer);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            sendMessagesThread.setDaemon(true);
+            sendMessagesThread.start();
+
+            try {
+                receiveMessagesThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }
-        catch (IOException e)
-        {
-            System.out.println("Подключение к серверу не удалось");
-            System.out.println();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

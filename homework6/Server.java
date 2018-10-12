@@ -1,56 +1,78 @@
 package homework6;
-/**
- * @author Холопкин Юрий
- */
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
-    // здесь задается порт сервера, для jabber по умолчанию это 5222
-    public static final int PORT = 5222;
+public class Server {;
 
     public static void main(String[] args) {
-        try
-        {
-/*1*/            ServerSocket serverSocket = new ServerSocket(PORT);
-/*2*/            System.out.println("Сервер запущен на " + PORT + " порту");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-/*4*/                Socket socket = serverSocket.accept();
-/*3*/            try {
-/*5*/                System.out.println("Клиент подключился");
-                // получаем входящий поток из входящего потока сокета и передаем в обертку буффера чтения для удобства
-/*6*/                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                // вывод выталкиваем из буффера PrintWriter
-                // второй параметр указывает, что надо автоматически добавлять в Writer данные
-/*7*/                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                while (true) {
-/*8*/                    String input = in.readLine();
-/*9*/                    if (input.equals("end")) {
-                        System.out.println("Разковор закончен");
-/*10*/                  break;
-                    }
+        new Server();
+    }
 
-                    if (input.equals("Привет") || input.equals("привет")) {
-                        out.println("Ну привет!");
+    public final static int PORT = 5223;
+
+    public Server() {
+
+        try {
+            ServerSocket server = new ServerSocket(PORT);
+            Socket socket = server.accept();
+            System.out.println("Клиент подключился");
+
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            BufferedReader message = new BufferedReader(new InputStreamReader(System.in));
+
+            // поток для получения сообщений
+            Thread receiveMessages = new Thread(() -> {
+                try {
+                    while (true) {
+                        String str = in.readUTF();
+                        if (str.split(" ")[1].equals("END")) {
+                            out.writeUTF("Завершение работы сервера");
+                            break;
+                        }
+                        System.out.println(str);
                     }
-/*11*/                    System.out.println(input);
-                    out.println(reader.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        in.close();
+                        out.close();
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+            });
+            receiveMessages.start();
+
+            // поток для отправки сообщений
+            Thread sendMessagesThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            String answer = message.readLine();
+                            out.writeUTF("Сервер написал" + ": " + answer);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            sendMessagesThread.setDaemon(true);
+            sendMessagesThread.start();
+
+            try {
+                receiveMessages.join();
+            } catch (InterruptedException e) {
+                System.out.println("Прерывание потока пошло не по плану");
             }
-            finally
-            {
-                socket.close();
-                serverSocket.close();
-            }
-        }
-        catch (IOException e)
-        {
-            System.out.println("Проблемма инициализации сервера");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
