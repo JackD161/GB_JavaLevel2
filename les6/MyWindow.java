@@ -92,4 +92,8 @@ public class MyWindow extends JFrame {
         out . flush ();
         jtf . setText ( "" );
     }
+
+    public static void main(String[] args) {
+        new MyWindow();
+    }
 }

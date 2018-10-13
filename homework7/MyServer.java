@@ -9,10 +9,6 @@ public class MyServer {
     private ServerSocket server;
     private Vector<ClientHandler> clients;
     private AuthService authService;
-    public Vector<ClientHandler> getClients()
-    {
-        return clients;
-    }
     public AuthService getAuthService()
     {
         return authService;

@@ -6,6 +6,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 public class WindowChatClient extends JFrame {
     private JFrame window; // само окно чата
@@ -20,9 +24,100 @@ public class WindowChatClient extends JFrame {
     private JMenuItem saveAs; // создаем пункт меню для сохранения диалога
     private JMenuItem exit; // создаем пункт меню для выхода из приложения
     private JMenuItem aboutIt; // создаем пункт меню справки описывающий текущую программу
+    private JFrame authWindow;
+    private JTextField loginField;
+    private JTextField passField;
+    private JButton ok;
+    private JLabel labelLogin;
+    private JLabel labelPass;
+    private JLabel labelNick;
+    private JTextField nickField;
+    private String login;
+    private String pass;
+    private String nick;
+    DataInputStream in;
+    DataOutputStream out;
+    Socket socket;
+    private final String SERVER_ADDR = "localhost" ;
+    private final int SERVER_PORT = 8189 ;
 
     public WindowChatClient()
     {
+        try {
+            socket = new Socket(SERVER_ADDR, SERVER_PORT);
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        authWindow = new JFrame("Окно авторизации");
+        labelLogin = new JLabel("Логин");
+        labelPass = new JLabel("Пароль");
+        labelNick = new JLabel("Ник");
+        loginField = new JTextField(12);
+        passField = new JTextField(12);
+        nickField = new JTextField(12);
+        ok = new JButton("OK");
+        authWindow.getContentPane();
+        authWindow.setLayout(new FlowLayout(FlowLayout.CENTER));
+        authWindow.add(labelLogin);
+        authWindow.add(loginField);
+        authWindow.add(labelPass);
+        authWindow.add(passField);
+        authWindow.add(labelNick);
+        authWindow.add(nickField);
+        authWindow.add(ok);
+        authWindow.setBounds(300,300,230, 200);
+        authWindow.setVisible(true);
+        authWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        ok.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                login = loginField.getText();
+                pass = passField.getText();
+                nick = nickField.getText();
+                if (login.isEmpty())
+                {
+                    loginField.setBackground(Color.red);
+                }
+                else
+                {
+                    loginField.setBackground(Color.white);
+                }
+                if (pass.isEmpty())
+                {
+                    passField.setBackground(Color.red);
+                }
+                else
+                {
+                    passField.setBackground(Color.white);
+                }
+                if (nick.isEmpty())
+                {
+                    nickField.setBackground(Color.red);
+                }
+                else
+                {
+                    nickField.setBackground(Color.white);
+                }
+                try
+                {
+                    out.writeUTF("/auth " + login + " " + pass);
+                    loginField.setText("");
+                    passField.setText("");
+                }
+                catch (IOException exception)
+                {
+                    exception.printStackTrace();
+                }
+                if (!login.isEmpty() && !pass.isEmpty() && !nick.isEmpty()) {
+                    authWindow.setVisible(false);
+                    window.setVisible(true); // делаем окно видимым
+                }
+            }
+        });
         window = new JFrame("Текстовый чат"); // создаем само окно с названием
         window.setBounds(300,300,700,400); // задаем координаты и размер окна в пикселах
         window.setDefaultCloseOperation(EXIT_ON_CLOSE); // добавляем что бы наша программа закрывалась по крестику закрытия окна
@@ -68,7 +163,14 @@ public class WindowChatClient extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.append("\n" + "Вы: " + message.getText()); // добавляем к нашему диалогу текст из поля сообщения
-                dialog.append("\n" + ": тестовый ответ"); // добавляем импровизированный ответ
+                try {
+                    out.writeUTF(message.getText());
+                    message.setText("");
+                }
+                catch (IOException ex)
+                {
+                    ex.printStackTrace();
+                }
                 message.setText(""); // очищаем поле сообщения
             }
         });
@@ -83,7 +185,14 @@ public class WindowChatClient extends JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER)
                 {
                     dialog.append("\n" + "Вы: " + message.getText());
-                    dialog.append("\n" + ": тестовый ответ");
+                    try {
+                        out.writeUTF(message.getText());
+                        message.setText("");
+                    }
+                    catch (IOException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                     message.setText("");
                 }
             }
@@ -130,6 +239,10 @@ public class WindowChatClient extends JFrame {
                 JOptionPane.showMessageDialog(window,"Ну допустим сохранили диалог");
             }
         });
-        window.setVisible(true); // делаем окно видимым
+
+  }
+
+    public static void main(String[] args) {
+        new WindowChatClient();
     }
 }
